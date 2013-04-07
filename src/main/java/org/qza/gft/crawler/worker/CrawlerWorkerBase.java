@@ -24,15 +24,19 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 
 	public void run() {
 		try {
-			if (getQueued().peek() == null) {
+			String link = getQueued().peek();
+			if (link == null) {
 				log.warn("Nothing to do here");
 			} else {
-				execute(getQueued().poll());
+				try {
+					execute();
+				} catch (CrawlerWorkerException cwe) {
+					logError(link, cwe);
+				}
 				logSuccess();
 			}
 		} catch (Exception ex) {
 			log.error(ex.getMessage());
-			// TODO Check if should throw runtime exception
 		}
 	}
 
@@ -52,11 +56,11 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 				ex.getMessage()));
 		log.error(message.toString());
 	}
-	
+
 	protected BlockingQueue<String> getQueued() {
 		return context.getQueuedLinks();
 	}
-	
+
 	protected BlockingQueue<String> getVisited() {
 		return context.getVisitedLinks();
 	}

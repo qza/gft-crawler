@@ -3,36 +3,42 @@
  */
 package org.qza.gft.crawler;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
  * @author qza
  * 
- * Initiates crawling process
- *
+ *         Initiates crawling process
+ * 
  */
-@Component
 public class CrawlerRunner {
-	
-	@Autowired
+
+	private ApplicationContext ac;
+
 	private CrawlerSpawner spawner;
-	
+
 	final Logger log = LoggerFactory.getLogger(CrawlerRunner.class);
 
 	/**
 	 * Created new CrawlerRunner instance
 	 */
+
 	public CrawlerRunner() {
-		// TODO Auto-generated constructor stub
+		ac = new AnnotationConfigApplicationContext(CrawlerConfig.class);
+		spawner = ac.getBean(CrawlerSpawner.class);
 	}
-	
+
 	public void start() {
-		log.info("Crawling process started.");
-		// TODO
-		log.info("Crawling process ended.");
+		Date startTime = new Date(System.currentTimeMillis());
+		log.info("Crawling process started (" + startTime + ")");
+		spawner.spawn();
+		Date endTime = new Date(System.currentTimeMillis());
+		log.info("Crawling process ended (" + endTime + ")");
 	}
 
 	/**
@@ -41,6 +47,7 @@ public class CrawlerRunner {
 	public static void main(String[] args) {
 		CrawlerRunner runner = new CrawlerRunner();
 		runner.start();
+		System.exit(1);
 	}
 
 }

@@ -12,7 +12,7 @@ import org.qza.gft.crawler.worker.CrawlerWorkerException;
 
 /**
  * @author qza
- *
+ * 
  */
 public class JsoupWorker extends CrawlerWorkerBase {
 
@@ -20,11 +20,12 @@ public class JsoupWorker extends CrawlerWorkerBase {
 		super(crawlerName, context);
 	}
 
-	public void execute(String link) throws CrawlerWorkerException {
+	public void execute() throws CrawlerWorkerException {
 		Document doc = null;
 		try {
-			doc = Jsoup.connect(link).timeout(0).get();
-			Iterator<Element> links = doc.select(context.getLinksCss()).iterator();
+			doc = Jsoup.connect(getQueued().poll()).timeout(0).get();
+			Iterator<Element> links = doc.select(context.getLinksCss())
+					.iterator();
 			while (links.hasNext()) {
 				String relatedLink = links.next().attr("href");
 				if (!getVisited().contains(relatedLink)) {
@@ -32,11 +33,9 @@ public class JsoupWorker extends CrawlerWorkerBase {
 					getVisited().put(relatedLink);
 				}
 			}
-			
-		} catch (Exception ex) {
-			logError(link, ex);
+		} catch (Throwable ex) {
+			throw new CrawlerWorkerException(ex.getMessage());
 		}
-
 	}
 
 }

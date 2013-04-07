@@ -32,8 +32,14 @@ public class CrawlerConfig {
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public CrawlerContext context() {
 		CrawlerContext context = new CrawlerContext();
-		context.setEntryUrl(env.getProperty("crawler.entry.url"));
 		context.setLinksCss(env.getProperty("crawler.links.css"));
+		context.setWait4queue(getBooleanProperty("spawner.wait4queue"));
+		context.setMaxResults(getIntegerProperty("crawler.maxresults"));
+		context.setResultsfile(env.getProperty("crawler.resultsfile"));
+		context.setCrawlerCount(getIntegerProperty("crawler.count"));
+		context.setReleaseTime(getIntegerProperty("spawner.releasetime"));
+		context.setInitPause(getIntegerProperty("spawner.initpause"));
+		context.getQueuedLinks().add(env.getProperty("crawler.entry.url"));
 		return context;
 	}
 	
@@ -55,6 +61,10 @@ public class CrawlerConfig {
 
 	private Integer getIntegerProperty(String key) {
 		return Integer.valueOf(env.getProperty(key));
+	}
+	
+	private Boolean getBooleanProperty(String key) {
+		return Boolean.valueOf(env.getProperty(key));
 	}
 
 }
