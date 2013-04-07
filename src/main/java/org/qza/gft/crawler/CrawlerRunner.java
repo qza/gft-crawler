@@ -5,6 +5,8 @@ package org.qza.gft.crawler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author qza
@@ -12,7 +14,11 @@ import org.slf4j.LoggerFactory;
  * Initiates crawling process
  *
  */
+@Component
 public class CrawlerRunner {
+	
+	@Autowired
+	private CrawlerSpawner spawner;
 	
 	final Logger log = LoggerFactory.getLogger(CrawlerRunner.class);
 
