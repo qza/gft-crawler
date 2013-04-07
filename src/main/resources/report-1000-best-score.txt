@@ -1,0 +1,23 @@
+
+ 		 Crawling report 	 
+ ********************************** 
+
+ Parameters: 	 
+ 	 Runner count: 				 100000 
+ 	 Runner init pause: 		 270 
+ 	 Wait 4 queue: 				 true 
+ 	 Pool initialSize: 			 40 
+ 	 Pool maxSize: 				 40 
+ 	 Release time: 				 1 
+
+ Results: 	 
+ 	 Duration: 					 0 hours 1 minutes 36 seconds 
+ 	 Visited: 					 1009 
+ 	 Visited / Second: 			 10.51 
+ 	 Remained in queue: 		 674 
+ 	 Executor task count: 		 336 
+ 	 Completed task count: 		 323 
+ 	 Remained task count: 		 13 
+
+ ********************************** 
+

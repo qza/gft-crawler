@@ -3,6 +3,9 @@ package org.qza.gft.crawler;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 /**
@@ -32,12 +35,13 @@ public class CrawlerReporter {
 			Date endTime = context.getEndTime();
 			Integer visitedSize = context.getVisitedLinks().size();
 			String duration = calculateDuration(startTime, endTime);
-			Integer visitedInSecond = calculateVisitedInSecond(visitedSize, startTime, endTime);
+			BigDecimal visitedInSecond = calculateVisitedInSecond(visitedSize,
+					startTime, endTime);
 			String report = String.format(getTemplate(),
 					context.getCrawlerCount(), context.getInitPause(),
 					context.getWait4queue(), spawner.getCorePoolSize(),
 					spawner.getMaximumPoolSize(), context.getReleaseTime(),
-					duration, visitedSize, visitedInSecond,
+					duration, visitedSize, decimalFormat(visitedInSecond),
 					context.getQueuedLinks().size(), spawner.getTaskCount(),
 					spawner.getCompletedTaskCount(), spawner.getActiveCount());
 			writer.write(report + "\r\n");
@@ -76,17 +80,30 @@ public class CrawlerReporter {
 
 	private String calculateDuration(Date start, Date end) {
 		long duration = end.getTime() - start.getTime();
-		int hours = (int) (duration / (1000 * 60 * 60));
-		int minutes = (int) (duration - hours * 1000 * 60 * 60) / (1000 * 60);
-		int seconds = (int) (duration - hours * 1000 * 60 * 60 - minutes * 1000 * 60) / 1000;
-		return String.format("%d hours %d minutes %d seconds", hours, minutes,
-				seconds);
+		BigDecimal hours = roundNice(duration / (1000 * 60 * 60));
+		BigDecimal minutes = roundNice((duration - hours.intValue() * 1000 * 60 * 60)
+				/ (1000 * 60));
+		BigDecimal seconds = roundNice((duration - hours.intValue() * 1000 * 60
+				* 60 - minutes.intValue() * 1000 * 60) / 1000);
+		return String.format("%s hours %s minutes %s seconds",
+				decimalFormat(hours), decimalFormat(minutes),
+				decimalFormat(seconds));
 	}
 
-	private Integer calculateVisitedInSecond(Integer visited, Date start,
+	private BigDecimal calculateVisitedInSecond(Integer visited, Date start,
 			Date end) {
-		int seconds = (int) (end.getTime() - start.getTime()) / (1000);
-		return visited / seconds;
+		BigDecimal seconds = roundNice((end.getTime() - start.getTime()) / (1000));
+		BigDecimal result = roundNice(visited).divide(seconds, 2, RoundingMode.HALF_UP); 
+		return result;
+	}
+
+	private BigDecimal roundNice(long value) {
+		return new BigDecimal(String.valueOf(value)).setScale(2,
+				BigDecimal.ROUND_HALF_UP);
+	}
+
+	private String decimalFormat(BigDecimal value) {
+		return new DecimalFormat("##.##").format(value);
 	}
 
 }
