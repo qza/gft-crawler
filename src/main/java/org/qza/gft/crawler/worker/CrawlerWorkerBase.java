@@ -42,10 +42,8 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 
 	protected void logSuccess() {
 		StringBuilder message = new StringBuilder();
-		message.append(String.format(
-				" ~ completed ~ : ~ ( q : %d ) ( v : %d )", context
-						.getQueuedLinks().size(), context.getVisitedLinks()
-						.size()));
+		message.append(String.format(" ~ completed ~ : ~ ( v : %d )", context
+				.getVisitedLinks().size()));
 		log.info(message.toString());
 	}
 
