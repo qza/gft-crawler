@@ -50,7 +50,7 @@ public class CrawlerRunner {
 	public static void main(String[] args) {
 		CrawlerRunner runner = new CrawlerRunner();
 		runner.start();
-		System.exit(1);
+		System.exit(0);
 	}
 
 }
