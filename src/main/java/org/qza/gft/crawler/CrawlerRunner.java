@@ -22,6 +22,8 @@ public class CrawlerRunner {
 
 	private CrawlerSpawner spawner;
 
+	private CrawlerResulter resulter;
+
 	final Logger log = LoggerFactory.getLogger(CrawlerRunner.class);
 
 	/**
@@ -31,14 +33,15 @@ public class CrawlerRunner {
 	public CrawlerRunner() {
 		ac = new AnnotationConfigApplicationContext(CrawlerConfig.class);
 		spawner = ac.getBean(CrawlerSpawner.class);
+		resulter = ac.getBean(CrawlerResulter.class);
 	}
 
 	public void start() {
-		Date startTime = new Date(System.currentTimeMillis());
-		log.info("Crawling process started (" + startTime + ")");
+		log.info("Crawling process started (" + new Date() + ")");
 		spawner.spawn();
-		Date endTime = new Date(System.currentTimeMillis());
-		log.info("Crawling process ended (" + endTime + ")");
+		log.info("Writing links to file ... (" + new Date() + ")");
+		resulter.writeLinksToFile();
+		log.info("Crawling process ended (" + new Date() + ")");
 	}
 
 	/**

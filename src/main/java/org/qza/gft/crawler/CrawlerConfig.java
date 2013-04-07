@@ -58,6 +58,12 @@ public class CrawlerConfig {
 		CrawlerSpawner spawner = new CrawlerSpawner(context(), executor());
 		return spawner;
 	}
+	
+	@Bean
+	public CrawlerResulter resulter() {
+		CrawlerResulter resulter = new CrawlerResulter(context());
+		return resulter;
+	}
 
 	private Integer getIntegerProperty(String key) {
 		return Integer.valueOf(env.getProperty(key));
