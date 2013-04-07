@@ -55,7 +55,7 @@ public class CrawlerSpawner {
 	}
 
 	protected void end() {
-		for (int i = 0; i < context.getReleaseTime() && isNotResultMax(); i++) {
+		for (int i = 0; i < context.getReleaseTime(); i++) {
 			if (!executor.isTerminated()) {
 				log.warn(String.format(
 						"\n\n Exiting in %d .. Still active: %d \n\n",

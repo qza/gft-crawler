@@ -49,7 +49,7 @@ public class CrawlerConfig {
 		Integer maxSize = getIntegerProperty("spawner.tpool.maxsize");
 		BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>(); 
 		ThreadPoolExecutor tpool = new ThreadPoolExecutor(initSize, maxSize,
-				0L, TimeUnit.MILLISECONDS, blockingQueue);
+				10000, TimeUnit.MILLISECONDS, blockingQueue);
 		return tpool;
 	}
 
