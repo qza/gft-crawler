@@ -3,6 +3,9 @@
  */
 package org.qza.gft.crawler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author qza
  * 
@@ -10,6 +13,8 @@ package org.qza.gft.crawler;
  *
  */
 public class CrawlerRunner {
+	
+	final Logger log = LoggerFactory.getLogger(CrawlerRunner.class);
 
 	/**
 	 * Created new CrawlerRunner instance
@@ -19,7 +24,9 @@ public class CrawlerRunner {
 	}
 	
 	public void start() {
-		// TODO 
+		log.info("Crawling process started.");
+		// TODO
+		log.info("Crawling process ended.");
 	}
 
 	/**
