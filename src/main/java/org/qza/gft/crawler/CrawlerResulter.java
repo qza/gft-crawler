@@ -28,7 +28,7 @@ public class CrawlerResulter {
 			Iterator<String> it = context.getVisitedLinks().iterator();
 			while (it.hasNext()) {
 				String lnk = it.next();
-				writer.write(lnk + "\t");
+				writer.write(lnk + "\r\n");
 			}
 			writer.close();
 		} catch (IOException e) {

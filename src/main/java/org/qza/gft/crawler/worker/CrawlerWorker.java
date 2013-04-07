@@ -13,5 +13,5 @@ public interface CrawlerWorker extends Runnable {
 	 * @throws CrawlerWorkerException
 	 */
 	void execute() throws CrawlerWorkerException;
-	
+
 }

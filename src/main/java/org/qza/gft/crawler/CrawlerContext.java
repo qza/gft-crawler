@@ -23,12 +23,14 @@ public class CrawlerContext {
 	private Boolean wait4queue;
 	
 	private Integer maxResults;
-	private String resultsfile;
-	private Integer crawlerCount;
 	
+	private String resultsfile;
+	private String reportsfile;
+
+	private Integer crawlerCount;
 	private Integer initPause;
 	private Integer releaseTime;
-
+	
 	public CrawlerContext() {
 		queuedLinks = new LinkedBlockingQueue<String>();
 		visitedLinks = new LinkedBlockingQueue<String>();
@@ -45,9 +47,17 @@ public class CrawlerContext {
 	public Date getStartTime() {
 		return startTime;
 	}
+	
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
 
 	public Date getEndTime() {
 		return endTime;
+	}
+	
+	public void setEndTime(Date endTime) {
+		this.endTime = endTime;
 	}
 
 	public String getLinksCss() {
@@ -104,6 +114,14 @@ public class CrawlerContext {
 	
 	public void setInitPause(Integer initPause) {
 		this.initPause = initPause;
+	}
+	
+	public String getReportsfile() {
+		return reportsfile;
+	}
+	
+	public void setReportsfile(String reportsfile) {
+		this.reportsfile = reportsfile;
 	}
 
 }

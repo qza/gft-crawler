@@ -3,8 +3,6 @@
  */
 package org.qza.gft.crawler;
 
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -24,6 +22,8 @@ public class CrawlerRunner {
 
 	private CrawlerResulter resulter;
 
+	private CrawlerReporter reporter;
+
 	final Logger log = LoggerFactory.getLogger(CrawlerRunner.class);
 
 	/**
@@ -34,23 +34,31 @@ public class CrawlerRunner {
 		ac = new AnnotationConfigApplicationContext(CrawlerConfig.class);
 		spawner = ac.getBean(CrawlerSpawner.class);
 		resulter = ac.getBean(CrawlerResulter.class);
+		reporter = ac.getBean(CrawlerReporter.class);
 	}
 
 	public void start() {
-		log.info("Crawling process started (" + new Date() + ")");
+		log.info("Crawling process started.");
 		spawner.spawn();
-		log.info("Writing links to file ... (" + new Date() + ")");
+		log.info("Writing links to file ... ");
 		resulter.writeLinksToFile();
-		log.info("Crawling process ended (" + new Date() + ")");
+		log.info("Writing crawling report ... ");
+		reporter.writeReport();
+		log.info("Crawling process ended.");
 	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		CrawlerRunner runner = new CrawlerRunner();
-		runner.start();
-		System.exit(0);
+		try {
+			CrawlerRunner runner = new CrawlerRunner();
+			runner.start();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			System.exit(0);
+		}
 	}
 
 }

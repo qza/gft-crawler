@@ -36,6 +36,7 @@ public class CrawlerConfig {
 		context.setWait4queue(getBooleanProperty("spawner.wait4queue"));
 		context.setMaxResults(getIntegerProperty("crawler.maxresults"));
 		context.setResultsfile(env.getProperty("crawler.resultsfile"));
+		context.setReportsfile(env.getProperty("crawler.reportsfile"));
 		context.setCrawlerCount(getIntegerProperty("crawler.count"));
 		context.setReleaseTime(getIntegerProperty("spawner.releasetime"));
 		context.setInitPause(getIntegerProperty("spawner.initpause"));
@@ -44,6 +45,7 @@ public class CrawlerConfig {
 	}
 	
 	@Bean
+	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public ThreadPoolExecutor executor() {
 		Integer initSize = getIntegerProperty("spawner.tpool.initsize");
 		Integer maxSize = getIntegerProperty("spawner.tpool.maxsize");
@@ -54,15 +56,24 @@ public class CrawlerConfig {
 	}
 
 	@Bean
+	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public CrawlerSpawner spawner() {
 		CrawlerSpawner spawner = new CrawlerSpawner(context(), executor());
 		return spawner;
 	}
 	
 	@Bean
+	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public CrawlerResulter resulter() {
 		CrawlerResulter resulter = new CrawlerResulter(context());
 		return resulter;
+	}
+	
+	@Bean
+	@Scope(BeanDefinition.SCOPE_SINGLETON)
+	public CrawlerReporter reporter() {
+		CrawlerReporter reporter = new CrawlerReporter(context(), spawner());
+		return reporter;
 	}
 
 	private Integer getIntegerProperty(String key) {

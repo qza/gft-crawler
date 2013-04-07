@@ -1,5 +1,6 @@
 package org.qza.gft.crawler;
 
+import java.util.Date;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,6 +37,7 @@ public class CrawlerSpawner {
 	}
 
 	protected void begin() {
+		context.setStartTime(new Date(System.currentTimeMillis()));
 		AtomicInteger crawlerId = new AtomicInteger();
 		for (int i = 0; i < context.getCrawlerCount() && isNotResultMax(); i++) {
 			CrawlerWorkerBase worker = new JsoupWorker(String.format(
@@ -52,6 +54,7 @@ public class CrawlerSpawner {
 					executor.getActiveCount()));
 			zzz(context.getInitPause());
 		}
+		context.setEndTime(new Date(System.currentTimeMillis()));
 	}
 
 	protected void end() {
@@ -77,6 +80,30 @@ public class CrawlerSpawner {
 		} catch (InterruptedException e) {
 			Thread.interrupted();
 		}
+	}
+
+	public Integer getActiveCount() {
+		return executor.getActiveCount();
+	}
+
+	public Integer getTaskCount() {
+		return new Long(executor.getTaskCount()).intValue();
+	}
+
+	public Integer getCompletedTaskCount() {
+		return new Long(executor.getCompletedTaskCount()).intValue();
+	}
+
+	public Integer getCorePoolSize() {
+		return new Long(executor.getCorePoolSize()).intValue();
+	}
+
+	public Integer getMaximumPoolSize() {
+		return new Long(executor.getMaximumPoolSize()).intValue();
+	}
+
+	public Integer getLargestPoolSize() {
+		return new Long(executor.getLargestPoolSize()).intValue();
 	}
 
 }
