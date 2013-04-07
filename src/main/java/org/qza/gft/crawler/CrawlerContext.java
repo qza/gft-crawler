@@ -7,7 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * @author qza
  * 
- * Context with queues for spawning crawlers
+ *         Context with queues for spawning crawlers
  * 
  */
 public class CrawlerContext {
@@ -17,6 +17,9 @@ public class CrawlerContext {
 
 	private Date startTime;
 	private Date endTime;
+
+	private String entryUrl;
+	private String linksCss;
 
 	public CrawlerContext() {
 		queuedLinks = new LinkedBlockingQueue<String>();
@@ -37,6 +40,22 @@ public class CrawlerContext {
 
 	public Date getEndTime() {
 		return endTime;
+	}
+
+	public String getEntryUrl() {
+		return entryUrl;
+	}
+
+	public String getLinksCss() {
+		return linksCss;
+	}
+
+	public void setEntryUrl(String entryUrl) {
+		this.entryUrl = entryUrl;
+	}
+
+	public void setLinksCss(String linksCss) {
+		this.linksCss = linksCss;
 	}
 
 }

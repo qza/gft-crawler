@@ -6,10 +6,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
 
 /**
@@ -27,22 +29,27 @@ public class CrawlerConfig {
 	private Environment env;
 
 	@Bean
-	public BlockingQueue<Runnable> blockingQueue() {
-		return new LinkedBlockingQueue<Runnable>();
+	@Scope(BeanDefinition.SCOPE_SINGLETON)
+	public CrawlerContext context() {
+		CrawlerContext context = new CrawlerContext();
+		context.setEntryUrl(env.getProperty("crawler.entry.url"));
+		context.setLinksCss(env.getProperty("crawler.links.css"));
+		return context;
 	}
-
+	
 	@Bean
 	public ThreadPoolExecutor executor() {
 		Integer initSize = getIntegerProperty("spawner.tpool.initsize");
 		Integer maxSize = getIntegerProperty("spawner.tpool.maxsize");
+		BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>(); 
 		ThreadPoolExecutor tpool = new ThreadPoolExecutor(initSize, maxSize,
-				0L, TimeUnit.MILLISECONDS, blockingQueue());
+				0L, TimeUnit.MILLISECONDS, blockingQueue);
 		return tpool;
 	}
 
 	@Bean
 	public CrawlerSpawner spawner() {
-		CrawlerSpawner spawner = new CrawlerSpawner(executor());
+		CrawlerSpawner spawner = new CrawlerSpawner(context(), executor());
 		return spawner;
 	}
 
