@@ -21,8 +21,7 @@ public class CrawlerSpawner {
 	final CrawlerContext context;
 	final ThreadPoolExecutor executor;
 
-	public CrawlerSpawner(final CrawlerContext context,
-			final ThreadPoolExecutor executor) {
+	public CrawlerSpawner(final CrawlerContext context, final ThreadPoolExecutor executor) {
 		this.context = context;
 		this.executor = executor;
 		this.log = LoggerFactory.getLogger("Giftly Spawner");
@@ -31,47 +30,58 @@ public class CrawlerSpawner {
 	public void spawn() {
 		try {
 			begin();
+			waitToFinish();
 		} finally {
-			end();
+			shutdown();
 		}
 	}
 
 	protected void begin() {
+
 		context.setStartTime(new Date(System.currentTimeMillis()));
-		AtomicInteger crawlerId = new AtomicInteger();
-		for (int i = 0; i < context.getCrawlerCount() && isNotResultMax(); i++) {
-			CrawlerWorkerBase worker = new JsoupWorker(String.format(
-					"Giftly crawler %d", crawlerId.getAndIncrement()), context);
-			if (context.getWait4queue()) {
-				while (executor.getActiveCount() > 0
-						&& context.getQueuedLinks().size() == 0) {
-					log.warn("Waiting for queue");
-					zzz(1000);
-				}
-			}
+
+		final AtomicInteger crawlerId = new AtomicInteger();
+		final int threadCount = executor.getMaximumPoolSize() / 2;
+		for (int i = 0; i < threadCount; i++) {
+			final String workerName = String.format("Giftly crawler %d", crawlerId.getAndIncrement());
+			CrawlerWorkerBase worker = new JsoupWorker(workerName, context);
 			executor.execute(worker);
-			log.info(String.format("%d started. Active : %d", i,
-					executor.getActiveCount()));
+			log.info(String.format("%d started. Active : %d", i, executor.getActiveCount()));
 			zzz(context.getInitPause());
 		}
-		context.setEndTime(new Date(System.currentTimeMillis()));
 	}
 
-	protected void end() {
+	private void waitToFinish() {
+		while (isNotResultMax()) {
+			zzz(1000);
+		}
+
+	}
+
+	private void waitForQueue(final CrawlerQueue workQueue) {
+		while (executor.getActiveCount() > 0 && workQueue.isEmpty()) {
+			log.warn("Waiting for queue");
+			zzz(1000);
+		}
+	}
+
+	protected void shutdown() {
+		context.setEndTime(new Date(System.currentTimeMillis()));
+
 		for (int i = 0; i < context.getReleaseTime(); i++) {
 			if (!executor.isTerminated()) {
-				log.warn(String.format(
-						"\n\n Exiting in %d .. Still active: %d \n\n",
-						(context.getReleaseTime() - i),
+				log.warn(String.format("\n\n Exiting in %d .. Still active: %d \n\n", (context.getReleaseTime() - i),
 						executor.getActiveCount()));
 				zzz(1000);
 			}
 		}
+
 		executor.shutdown();
 	}
 
 	protected boolean isNotResultMax() {
-		return context.getMaxResults() >= context.getVisitedLinks().size();
+		final CrawlerQueue workQueue = context.getWorkQueue();
+		return context.getMaxResults() >= workQueue.getVisitedSize();
 	}
 
 	protected void zzz(long time) {

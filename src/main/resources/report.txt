@@ -4,20 +4,20 @@
 
  Parameters: 	 
  	 Runner count: 				 100000 
- 	 Runner init pause: 		 260 
+ 	 Runner init pause: 		 280 
  	 Wait 4 queue: 				 true 
  	 Pool initialSize: 			 50 
  	 Pool maxSize: 				 50 
  	 Release time: 				 10 
 
  Results: 	 
- 	 Duration: 					 18 Min. 
- 	 Visited: 					 10111 
- 	 Visited / Min.: 			 561 
- 	 Remained in queue: 		 6261 
- 	 Executor task count: 		 4073 
- 	 Completed task count: 		 3801 
- 	 Remained task count: 		 50 
+ 	 Duration: 					 13 Min. 
+ 	 Visited: 					 10234 
+ 	 Visited / Min.: 			 787 
+ 	 Remained in queue: 		 6585 
+ 	 Executor task count: 		 25 
+ 	 Completed task count: 		 0 
+ 	 Remained task count: 		 25 
 
  ********************************** 
 

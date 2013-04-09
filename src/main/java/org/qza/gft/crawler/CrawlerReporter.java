@@ -30,7 +30,7 @@ public class CrawlerReporter {
 			writer = new FileWriter(file);
 			Date startTime = context.getStartTime();
 			Date endTime = context.getEndTime();
-			Integer visitedSize = context.getVisitedLinks().size();
+			Integer visitedSize = context.getWorkQueue().getVisitedSize();
 			String durationUnit = "Min.";
 			Integer duration = calculateDurationInMinutes(startTime, endTime);
 			if (duration == 0) {
@@ -44,7 +44,7 @@ public class CrawlerReporter {
 					context.getWait4queue(), spawner.getCorePoolSize(),
 					spawner.getMaximumPoolSize(), context.getReleaseTime(),
 					duration, durationUnit, visitedSize, durationUnit, visitedInMinute,
-					context.getQueuedLinks().size(), spawner.getTaskCount(),
+					context.getWorkQueue().getSize(), spawner.getTaskCount(),
 					spawner.getCompletedTaskCount(), spawner.getActiveCount());
 			writer.write(report + "\r\n");
 			writer.close();

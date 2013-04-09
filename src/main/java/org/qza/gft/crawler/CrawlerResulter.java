@@ -25,7 +25,7 @@ public class CrawlerResulter {
 		try {
 			File file = new File(context.getResultsfile());
 			writer = new FileWriter(file);
-			Iterator<String> it = context.getVisitedLinks().iterator();
+			Iterator<String> it = context.getWorkQueue().getVisitedLinks().iterator();
 			while (it.hasNext()) {
 				String lnk = it.next();
 				writer.write(lnk + "\r\n");

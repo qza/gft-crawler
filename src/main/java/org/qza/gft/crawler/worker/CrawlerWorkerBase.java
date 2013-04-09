@@ -1,8 +1,7 @@
 package org.qza.gft.crawler.worker;
 
-import java.util.concurrent.BlockingQueue;
-
 import org.qza.gft.crawler.CrawlerContext;
+import org.qza.gft.crawler.CrawlerQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,46 +22,41 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 	}
 
 	public void run() {
-		try {
-			String link = getQueued().peek();
-			if (link == null) {
-				log.warn("Nothing to do here");
-			} else {
-				try {
-					execute();
-				} catch (CrawlerWorkerException cwe) {
-					logError(link, cwe);
-				}
-				logSuccess();
-			}
-		} catch (Exception ex) {
-			log.error(ex.getMessage());
+		while (!Thread.interrupted()) {
+			processSingleLink();
 		}
 	}
 
+	private void processSingleLink() {
+		String link = getWorkQueue().peek();
+
+		try {
+			execute();
+		} catch (CrawlerWorkerException cwe) {
+			getWorkQueue().add(link);
+			logError(link, cwe);
+		}
+
+		logSuccess();
+	}
+
 	protected void logSuccess() {
+		final CrawlerQueue workQueue = context.getWorkQueue();
+
 		StringBuilder message = new StringBuilder();
-		message.append(String.format(
-				" ~ completed ~ : ~ ( q : %d ) ( v : %d )", context
-						.getQueuedLinks().size(), context.getVisitedLinks()
-						.size()));
+		message.append(String.format(" ~ completed ~ : ~ ( q : %d ) ( v : %d )", workQueue.getSize(),
+				workQueue.getVisitedSize()));
 		log.info(message.toString());
 	}
 
 	protected void logError(String link, Exception ex) {
 		StringBuilder message = new StringBuilder();
-		message.append(String.format(
-				"\n - problem with link %s . \n \t Error: %s \n", link,
-				ex.getMessage()));
+		message.append(String.format("\n - problem with link %s . \n \t Error: %s \n", link, ex.getMessage()));
 		log.error(message.toString());
 	}
 
-	protected BlockingQueue<String> getQueued() {
-		return context.getQueuedLinks();
-	}
-
-	protected BlockingQueue<String> getVisited() {
-		return context.getVisitedLinks();
+	protected CrawlerQueue getWorkQueue() {
+		return context.getWorkQueue();
 	}
 
 }

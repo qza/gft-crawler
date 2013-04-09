@@ -40,7 +40,7 @@ public class CrawlerConfig {
 		context.setCrawlerCount(getIntegerProperty("crawler.count"));
 		context.setReleaseTime(getIntegerProperty("spawner.releasetime"));
 		context.setInitPause(getIntegerProperty("spawner.initpause"));
-		context.getQueuedLinks().add(env.getProperty("crawler.entry.url"));
+		context.getWorkQueue().add(env.getProperty("crawler.entry.url"));
 		return context;
 	}
 	
@@ -75,7 +75,7 @@ public class CrawlerConfig {
 		CrawlerReporter reporter = new CrawlerReporter(context(), spawner());
 		return reporter;
 	}
-
+	
 	private Integer getIntegerProperty(String key) {
 		return Integer.valueOf(env.getProperty(key));
 	}
