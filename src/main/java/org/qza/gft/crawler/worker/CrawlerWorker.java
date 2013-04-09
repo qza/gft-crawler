@@ -7,11 +7,11 @@ package org.qza.gft.crawler.worker;
 public interface CrawlerWorker extends Runnable {
 
 	/**
-	 * Process queues from the crawling context
+	 * Process link and update crawling context
 	 * 
 	 * @param context
 	 * @throws CrawlerWorkerException
 	 */
-	void execute() throws CrawlerWorkerException;
+	void execute(String link) throws CrawlerWorkerException;
 
 }

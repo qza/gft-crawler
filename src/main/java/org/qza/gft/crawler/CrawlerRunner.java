@@ -38,27 +38,27 @@ public class CrawlerRunner {
 	}
 
 	public void start() {
-		log.info("Crawling process started.");
-		spawner.spawn();
-		log.info("Writing links to file ... ");
-		resulter.writeLinksToFile();
-		log.info("Writing crawling report ... ");
-		reporter.writeReport();
-		log.info("Crawling process ended.");
+		try {
+			log.info("Crawling process started.");
+			spawner.spawn();
+			log.info("Writing links to file ... ");
+			resulter.writeLinksToFile();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			log.info("Writing crawling report ... ");
+			reporter.writeReport();
+			log.info("Crawling process ended.");
+			System.exit(0);
+		}
 	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		try {
-			CrawlerRunner runner = new CrawlerRunner();
-			runner.start();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			System.exit(0);
-		}
+		CrawlerRunner runner = new CrawlerRunner();
+		runner.start();
 	}
 
 }

@@ -20,7 +20,7 @@ public class DuplicateEntriesTest extends BaseConfigTest {
 		FileReader fr = null;
 		BufferedReader br = null;
 		try {
-			fr = new FileReader("src/main/resources/results-50000.txt");
+			fr = new FileReader("src/main/resources/results-10000-segmentation.txt");
 			br = new BufferedReader(fr);
 			String s = null;
 			while ((s = br.readLine()) != null) {

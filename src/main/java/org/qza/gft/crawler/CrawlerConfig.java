@@ -5,6 +5,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.qza.gft.crawler.set.CrawlerSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
@@ -30,26 +31,55 @@ public class CrawlerConfig {
 
 	@Bean
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
-	public CrawlerContext context() {
-		CrawlerContext context = new CrawlerContext();
-		context.setLinksCss(env.getProperty("crawler.links.css"));
-		context.setWait4queue(getBooleanProperty("spawner.wait4queue"));
-		context.setMaxResults(getIntegerProperty("crawler.maxresults"));
-		context.setResultsfile(env.getProperty("crawler.resultsfile"));
-		context.setReportsfile(env.getProperty("crawler.reportsfile"));
-		context.setCrawlerCount(getIntegerProperty("crawler.count"));
-		context.setReleaseTime(getIntegerProperty("spawner.releasetime"));
-		context.setInitPause(getIntegerProperty("spawner.initpause"));
-		context.getQueuedLinks().add(env.getProperty("crawler.entry.url"));
-		return context;
+	public CrawlerProperties properties() {
+		CrawlerProperties props = new CrawlerProperties();
+		props.setLinksCss(env.getProperty("crawler.links.css"));
+		props.setWait4queue(getBooleanProperty("spawner.wait4queue"));
+		props.setMaxResults(getIntegerProperty("crawler.maxresults"));
+		props.setResultsfile(env.getProperty("crawler.resultsfile"));
+		props.setReportsfile(env.getProperty("crawler.reportsfile"));
+		props.setCrawlerCount(getIntegerProperty("crawler.count"));
+		props.setReleaseTime(getIntegerProperty("spawner.releasetime"));
+		props.setInitPause(getIntegerProperty("spawner.initpause"));
+		props.setStripPrefix(env.getProperty("crawler.strip.prefix"));
+		props.setStripSufix(env.getProperty("crawler.strip.sufix"));
+		props.setSegmentCount(getIntegerProperty("spawner.segment.count"));
+		props.setMaxQueueSize(getIntegerProperty("crawler.queue.maxsize"));
+		props.setPersistQueue(getBooleanProperty("crawler.queue.persist"));
+		props.setQueueFile(env.getProperty("crawler.queuefile"));
+		props.setJsoupTimeout(getIntegerProperty("crawler.jsoup.timeout"));
+		return props;
 	}
 	
+	@Bean
+	@Scope(BeanDefinition.SCOPE_SINGLETON)
+	public BlockingQueue<String> queue() {
+		BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+		return queue;
+	}
+
+	@Bean
+	@Scope(BeanDefinition.SCOPE_SINGLETON)
+	public CrawlerSet visitedSet() {
+		CrawlerSet visited = new CrawlerSet(properties(), queue());
+		return visited;
+	}
+
+	@Bean
+	@Scope(BeanDefinition.SCOPE_SINGLETON)
+	public CrawlerContext context() {
+		CrawlerContext context = new CrawlerContext(visitedSet());
+		String entryPoint = env.getProperty("crawler.entry.url");
+		context.getQueuedLinks().add(entryPoint);
+		return context;
+	}
+
 	@Bean
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public ThreadPoolExecutor executor() {
 		Integer initSize = getIntegerProperty("spawner.tpool.initsize");
 		Integer maxSize = getIntegerProperty("spawner.tpool.maxsize");
-		BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>(); 
+		BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>();
 		ThreadPoolExecutor tpool = new ThreadPoolExecutor(initSize, maxSize,
 				10000, TimeUnit.MILLISECONDS, blockingQueue);
 		return tpool;
@@ -58,30 +88,32 @@ public class CrawlerConfig {
 	@Bean
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public CrawlerSpawner spawner() {
-		CrawlerSpawner spawner = new CrawlerSpawner(context(), executor());
+		CrawlerSpawner spawner = new CrawlerSpawner(context(), properties(),
+				executor());
 		return spawner;
 	}
-	
+
 	@Bean
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public CrawlerResulter resulter() {
-		CrawlerResulter resulter = new CrawlerResulter(context());
+		CrawlerResulter resulter = new CrawlerResulter(context(), properties());
 		return resulter;
 	}
-	
+
 	@Bean
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public CrawlerReporter reporter() {
-		CrawlerReporter reporter = new CrawlerReporter(context(), spawner());
+		CrawlerReporter reporter = new CrawlerReporter(context(), properties(),
+				spawner());
 		return reporter;
 	}
 
 	private Integer getIntegerProperty(String key) {
-		return Integer.valueOf(env.getProperty(key));
+		return Integer.valueOf(env.getProperty(key).trim());
 	}
-	
+
 	private Boolean getBooleanProperty(String key) {
-		return Boolean.valueOf(env.getProperty(key));
+		return Boolean.valueOf(env.getProperty(key).trim());
 	}
 
 }

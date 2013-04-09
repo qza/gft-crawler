@@ -1,8 +1,10 @@
 package org.qza.gft.crawler.worker;
 
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import org.qza.gft.crawler.CrawlerContext;
+import org.qza.gft.crawler.CrawlerProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,24 +18,27 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 
 	final protected Logger log;
 	final protected CrawlerContext context;
+	final protected CrawlerProperties props;
 
-	public CrawlerWorkerBase(String crawlerName, final CrawlerContext context) {
+	public CrawlerWorkerBase(String crawlerName, final CrawlerContext context,
+			final CrawlerProperties props) {
 		this.log = LoggerFactory.getLogger(crawlerName);
 		this.context = context;
+		this.props = props;
 	}
 
 	public void run() {
 		try {
-			String link = getQueued().peek();
+			String link = getQueued().poll();
 			if (link == null) {
 				log.warn("Nothing to do here");
 			} else {
 				try {
-					execute();
+					execute(props.getStripPrefix().concat(link));
 				} catch (CrawlerWorkerException cwe) {
-					logError(link, cwe);
+					// logError(link, cwe);
 				}
-				logSuccess();
+				// logSuccess();
 			}
 		} catch (Exception ex) {
 			log.error(ex.getMessage());
@@ -42,8 +47,9 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 
 	protected void logSuccess() {
 		StringBuilder message = new StringBuilder();
-		message.append(String.format(" ~ completed ~ : ~ ( v : %d )", context
-				.getVisitedLinks().size()));
+		message.append(String.format(" ~ completed ~ : ~ ( q: %d ! v : %d )",
+				context.getQueuedLinks().size(), context.getVisitedLinks()
+						.size()));
 		log.info(message.toString());
 	}
 
@@ -59,8 +65,8 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 		return context.getQueuedLinks();
 	}
 
-	protected BlockingQueue<String> getVisited() {
-		return context.getVisitedLinks();
+	protected Set<String> getVisited() {
+		return context.getVisitedLinks().data();
 	}
 
 }

@@ -16,11 +16,13 @@ public class CrawlerReporter {
 
 	final CrawlerContext context;
 	final CrawlerSpawner spawner;
+	final CrawlerProperties props;
 
 	public CrawlerReporter(final CrawlerContext context,
-			final CrawlerSpawner spawner) {
+			final CrawlerProperties props, final CrawlerSpawner spawner) {
 		this.context = context;
 		this.spawner = spawner;
+		this.props = props;
 	}
 
 	/**
@@ -29,7 +31,7 @@ public class CrawlerReporter {
 	public void writeReport() {
 		FileWriter writer;
 		try {
-			File file = new File(context.getReportsfile());
+			File file = new File(props.getReportsfile());
 			writer = new FileWriter(file);
 			Date startTime = context.getStartTime();
 			Date endTime = context.getEndTime();
@@ -38,12 +40,13 @@ public class CrawlerReporter {
 			BigDecimal visitedInSecond = calculateVisitedInSecond(visitedSize,
 					startTime, endTime);
 			String report = String.format(getTemplate(),
-					context.getCrawlerCount(), context.getInitPause(),
-					context.getWait4queue(), spawner.getCorePoolSize(),
-					spawner.getMaximumPoolSize(), context.getReleaseTime(),
-					duration, visitedSize, decimalFormat(visitedInSecond),
+					props.getCrawlerCount(), props.getInitPause(),
+					props.getWait4queue(), spawner.getCorePoolSize(),
+					spawner.getMaximumPoolSize(), props.getReleaseTime(),
+					props.getMaxQueueSize(), duration, visitedSize, decimalFormat(visitedInSecond),
 					context.getQueuedLinks().size(), spawner.getTaskCount(),
-					spawner.getCompletedTaskCount(), spawner.getActiveCount());
+					spawner.getCompletedTaskCount(), spawner.getActiveCount(),
+					context.getVisitedLinks().stats());
 			writer.write(report + "\r\n");
 			writer.close();
 		} catch (IOException e) {
@@ -54,8 +57,8 @@ public class CrawlerReporter {
 	public String getTemplate() {
 		StringBuilder template = new StringBuilder();
 		template.append("\r\n");
-		template.append(" \t\t Crawling report \t \r\n");
-		template.append(" ********************************** \r\n");
+		template.append(" Crawling report \t \r\n");
+		template.append(" ****************************************************** \r\n");
 		template.append("\r\n");
 		template.append(" Parameters: \t \r\n");
 		template.append(" \t Runner count: \t\t\t\t %d \r\n");
@@ -64,6 +67,7 @@ public class CrawlerReporter {
 		template.append(" \t Pool initialSize: \t\t\t %d \r\n");
 		template.append(" \t Pool maxSize: \t\t\t\t %d \r\n");
 		template.append(" \t Release time: \t\t\t\t %d \r\n");
+		template.append(" \t Max Queue size: \t\t\t %d \r\n");
 		template.append("\r\n");
 		template.append(" Results: \t \r\n");
 		template.append(" \t Duration: \t\t\t\t\t %s \r\n");
@@ -74,7 +78,8 @@ public class CrawlerReporter {
 		template.append(" \t Completed task count: \t\t %d \r\n");
 		template.append(" \t Remained task count: \t\t %d \r\n");
 		template.append("\r\n");
-		template.append(" ********************************** \r\n");
+		template.append(" Segmentation stats: \t \r\n");
+		template.append(" %s \r\n");
 		return template.toString();
 	}
 
@@ -93,7 +98,8 @@ public class CrawlerReporter {
 	private BigDecimal calculateVisitedInSecond(Integer visited, Date start,
 			Date end) {
 		BigDecimal seconds = roundNice((end.getTime() - start.getTime()) / (1000));
-		BigDecimal result = roundNice(visited).divide(seconds, 2, RoundingMode.HALF_UP); 
+		BigDecimal result = roundNice(visited).divide(seconds, 2,
+				RoundingMode.HALF_UP);
 		return result;
 	}
 

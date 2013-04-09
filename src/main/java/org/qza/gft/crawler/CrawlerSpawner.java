@@ -19,11 +19,13 @@ public class CrawlerSpawner {
 
 	final Logger log;
 	final CrawlerContext context;
+	final CrawlerProperties props;
 	final ThreadPoolExecutor executor;
 
 	public CrawlerSpawner(final CrawlerContext context,
-			final ThreadPoolExecutor executor) {
+			final CrawlerProperties props, final ThreadPoolExecutor executor) {
 		this.context = context;
+		this.props = props;
 		this.executor = executor;
 		this.log = LoggerFactory.getLogger("Giftly Spawner");
 	}
@@ -37,12 +39,14 @@ public class CrawlerSpawner {
 	}
 
 	protected void begin() {
+		activateQueueBacker();
 		context.setStartTime(new Date(System.currentTimeMillis()));
 		AtomicInteger crawlerId = new AtomicInteger();
-		for (int i = 0; i < context.getCrawlerCount() && isNotResultMax(); i++) {
+		for (int i = 0; i < props.getCrawlerCount() && isNotResultMax(); i++) {
 			CrawlerWorkerBase worker = new JsoupWorker(String.format(
-					"Giftly crawler %d", crawlerId.getAndIncrement()), context);
-			if (context.getWait4queue()) {
+					"Giftly crawler %d", crawlerId.getAndIncrement()), context,
+					props);
+			if (props.getWait4queue()) {
 				while (executor.getActiveCount() > 0
 						&& context.getQueuedLinks().size() == 0) {
 					log.warn("Waiting for queue");
@@ -50,28 +54,51 @@ public class CrawlerSpawner {
 				}
 			}
 			executor.execute(worker);
-			log.info(String.format("%d started. Active : %d", i,
-					executor.getActiveCount()));
-			zzz(context.getInitPause());
+//			log.info(String.format("%d started. Active : %d", i,
+//					executor.getActiveCount()));
+			zzz(props.getInitPause());
 		}
 		context.setEndTime(new Date(System.currentTimeMillis()));
 	}
 
 	protected void end() {
-		for (int i = 0; i < context.getReleaseTime(); i++) {
+		for (int i = 0; i < props.getReleaseTime(); i++) {
 			if (!executor.isTerminated()) {
 				log.warn(String.format(
 						"\n\n Exiting in %d .. Still active: %d \n\n",
-						(context.getReleaseTime() - i),
-						executor.getActiveCount()));
+						(props.getReleaseTime() - i), executor.getActiveCount()));
 				zzz(1000);
 			}
 		}
+		context.activateBackQueued();
 		executor.shutdown();
 	}
 
+	protected void activateQueueBacker() {
+		if (props.getMaxQueueSize() != null && props.getMaxQueueSize() > 0) {
+			Runnable clener = new Runnable() {
+				public void run() {
+					while(true) {
+						int maxsize = props.getMaxQueueSize();
+						if(context.getQueuedLinks().size() >  maxsize ) {
+							context.getQueuedLinks().drainTo(context.getBackedQueue(), (maxsize * 90 / 100));
+							log.info("\n\nDrained queue\n\n");
+						}
+						try {
+							Thread.sleep(10000);
+						} catch (InterruptedException e) {
+							Thread.interrupted();
+						}
+					}
+				}
+			};
+			executor.execute(clener);
+			log.info("\nQueue backer activated.\n");
+		}
+	}
+
 	protected boolean isNotResultMax() {
-		return context.getMaxResults() >= context.getVisitedLinks().size();
+		return props.getMaxResults() > context.getVisitedLinks().size();
 	}
 
 	protected void zzz(long time) {

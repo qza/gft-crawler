@@ -14,4 +14,4 @@
 # Other #
 .springbeans
 *.db
-/src/main/resources/result*.txt
+/src/main/resources/report*.txt
