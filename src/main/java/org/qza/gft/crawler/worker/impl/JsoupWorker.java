@@ -32,7 +32,7 @@ public class JsoupWorker extends CrawlerWorkerBase {
 			for(String link: links)
 				getWorkQueue().addAndVisitIfNotVisited(link);
 		} catch (Throwable ex) {
-			throw new CrawlerWorkerException(ex.getMessage());
+			throw new CrawlerWorkerException(ex.getMessage(), ex);
 		}
 	}
 

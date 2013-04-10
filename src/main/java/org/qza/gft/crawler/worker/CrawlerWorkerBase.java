@@ -22,9 +22,11 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 	}
 
 	public void run() {
-		while (!Thread.interrupted()) {
+		while (!Thread.currentThread().isInterrupted()) {
 			processSingleLink();
 		}
+
+		logSuccess();
 	}
 
 	private void processSingleLink() {
@@ -36,8 +38,6 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 			getWorkQueue().add(link);
 			logError(link, cwe);
 		}
-
-		logSuccess();
 	}
 
 	protected void logSuccess() {

@@ -2,6 +2,7 @@ package org.qza.gft.crawler;
 
 import java.util.Date;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.qza.gft.crawler.worker.CrawlerWorkerBase;
@@ -41,13 +42,13 @@ public class CrawlerSpawner {
 		context.setStartTime(new Date(System.currentTimeMillis()));
 
 		final AtomicInteger crawlerId = new AtomicInteger();
-		final int threadCount = executor.getMaximumPoolSize() / 2;
+		final int threadCount = executor.getMaximumPoolSize();
+
 		for (int i = 0; i < threadCount; i++) {
 			final String workerName = String.format("Giftly crawler %d", crawlerId.getAndIncrement());
 			CrawlerWorkerBase worker = new JsoupWorker(workerName, context);
 			executor.execute(worker);
 			log.info(String.format("%d started. Active : %d", i, executor.getActiveCount()));
-			zzz(context.getInitPause());
 		}
 	}
 
@@ -61,15 +62,13 @@ public class CrawlerSpawner {
 	protected void shutdown() {
 		context.setEndTime(new Date(System.currentTimeMillis()));
 
-		for (int i = 0; i < context.getReleaseTime(); i++) {
-			if (!executor.isTerminated()) {
-				log.warn(String.format("\n\n Exiting in %d .. Still active: %d \n\n", (context.getReleaseTime() - i),
-						executor.getActiveCount()));
-				zzz(1000);
-			}
+		try {
+			executor.shutdownNow();
+			executor.awaitTermination(context.getReleaseTime(), TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// ignore
 		}
 
-		executor.shutdown();
 	}
 
 	protected boolean isNotResultMax() {
