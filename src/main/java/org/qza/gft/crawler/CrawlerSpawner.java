@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author qza
- * 
+ *
  *         Spawns multiple crawler workers with pool executor
- * 
+ *
  */
 public class CrawlerSpawner {
 
@@ -56,13 +56,6 @@ public class CrawlerSpawner {
 			zzz(1000);
 		}
 
-	}
-
-	private void waitForQueue(final CrawlerQueue workQueue) {
-		while (executor.getActiveCount() > 0 && workQueue.isEmpty()) {
-			log.warn("Waiting for queue");
-			zzz(1000);
-		}
 	}
 
 	protected void shutdown() {

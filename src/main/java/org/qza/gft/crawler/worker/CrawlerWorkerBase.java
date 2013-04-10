@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author qza
- * 
+ *
  *         Base for all crawler workers.
- * 
+ *
  */
 public abstract class CrawlerWorkerBase implements CrawlerWorker {
 
@@ -52,7 +52,7 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 	protected void logError(String link, Exception ex) {
 		StringBuilder message = new StringBuilder();
 		message.append(String.format("\n - problem with link %s . \n \t Error: %s \n", link, ex.getMessage()));
-		log.error(message.toString());
+		log.error(message.toString(), ex);
 	}
 
 	protected CrawlerQueue getWorkQueue() {

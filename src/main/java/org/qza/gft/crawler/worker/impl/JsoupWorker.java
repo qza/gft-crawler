@@ -1,7 +1,6 @@
 package org.qza.gft.crawler.worker.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -11,13 +10,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.qza.gft.crawler.CrawlerContext;
-import org.qza.gft.crawler.CrawlerPageContentFetcher;
 import org.qza.gft.crawler.worker.CrawlerWorkerBase;
 import org.qza.gft.crawler.worker.CrawlerWorkerException;
 
 /**
  * @author qza
- * 
+ *
  */
 public class JsoupWorker extends CrawlerWorkerBase {
 	private final String linkSelector;
@@ -30,7 +28,7 @@ public class JsoupWorker extends CrawlerWorkerBase {
 	public void execute() throws CrawlerWorkerException {
 		try {
 			final String pageUrl = getWorkQueue().take();
-			final Collection<String> links = extractLinksFromPage(pageUrl);
+			final Collection<String> links = extractLinksFromPageUsingJsoup(pageUrl);
 			for(String link: links)
 				getWorkQueue().addAndVisitIfNotVisited(link);
 		} catch (Throwable ex) {
@@ -38,11 +36,8 @@ public class JsoupWorker extends CrawlerWorkerBase {
 		}
 	}
 
-	private Collection<String> extractLinksFromPage(String pageUrl) throws ClientProtocolException, IOException {
-		final CrawlerPageContentFetcher contentFetcher = new CrawlerPageContentFetcher();
-		final InputStream inputStream = contentFetcher.getPageContent(pageUrl);
-		final Document document = Jsoup.parse(inputStream, "UTF-8", "");
-
+	private Collection<String> extractLinksFromPageUsingJsoup(String pageUrl) throws ClientProtocolException, IOException {
+		final Document document = Jsoup.connect(pageUrl).timeout(0).get();
 		return extractLinksFromDocument(document);
 	}
 
