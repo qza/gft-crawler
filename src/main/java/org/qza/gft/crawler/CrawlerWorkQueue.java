@@ -7,12 +7,12 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-public class CrawlerQueue {
+public class CrawlerWorkQueue {
 
 	private final Set<String> visitedLinks;
 	private final Deque<String> queuedLinks;
 
-	public CrawlerQueue() {
+	public CrawlerWorkQueue() {
 		queuedLinks = new LinkedList<String>();
 		visitedLinks = new LinkedHashSet<String>();
 	}

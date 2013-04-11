@@ -1,26 +1,34 @@
 package org.qza.gft.crawler;
 
+import static java.lang.String.format;
+
 import java.util.Date;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.qza.gft.crawler.worker.CrawlerWorkerBase;
-import org.qza.gft.crawler.worker.impl.JsoupWorker;
+import org.qza.gft.crawler.worker.impl.AmazonJsoupWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author qza
- * 
+ *
  *         Spawns multiple crawler workers with pool executor
- * 
+ *
  */
 public class CrawlerSpawner {
 
-	final Logger log;
-	final CrawlerContext context;
-	final ThreadPoolExecutor executor;
+	private final Logger log;
+
+	private final CrawlerContext context;
+	private final ThreadPoolExecutor executor;
+
+	private Date startTime;
+	private Date endTime;
+
+	private final CrawlerWorkQueue workQueue = new CrawlerWorkQueue();
 
 	public CrawlerSpawner(final CrawlerContext context, final ThreadPoolExecutor executor) {
 		this.context = context;
@@ -38,29 +46,34 @@ public class CrawlerSpawner {
 	}
 
 	protected void begin() {
-
-		context.setStartTime(new Date(System.currentTimeMillis()));
+		workQueue.add(context.getEntryUrl());
+		startTime = new Date(System.currentTimeMillis());
 
 		final AtomicInteger crawlerId = new AtomicInteger();
-		final int threadCount = executor.getMaximumPoolSize();
+		final int threadCount = Runtime.getRuntime().availableProcessors() * 15;
 
 		for (int i = 0; i < threadCount; i++) {
-			final String workerName = String.format("Giftly crawler %d", crawlerId.getAndIncrement());
-			CrawlerWorkerBase worker = new JsoupWorker(workerName, context);
+			final String workerName = format("Giftly crawler %d", crawlerId.getAndIncrement());
+			CrawlerWorkerBase worker = new AmazonJsoupWorker(workerName, workQueue);
 			executor.execute(worker);
-			log.info(String.format("%d started. Active : %d", i, executor.getActiveCount()));
 		}
+
+		log.info(format("All %d crawlers started", threadCount));
 	}
 
 	private void waitToFinish() {
-		while (!context.getWorkQueue().isEmpty()) {
+		while (isNotResultMax()) {
 			zzz(1000);
 		}
 
 	}
 
+	protected boolean isNotResultMax() {
+		return context.getMaxResults() >= workQueue.getVisitedSize();
+	}
+
 	protected void shutdown() {
-		context.setEndTime(new Date(System.currentTimeMillis()));
+		endTime = new Date(System.currentTimeMillis());
 
 		try {
 			executor.shutdownNow();
@@ -101,6 +114,26 @@ public class CrawlerSpawner {
 
 	public Integer getLargestPoolSize() {
 		return new Long(executor.getLargestPoolSize()).intValue();
+	}
+
+	public CrawlerWorkQueue getWorkQueue() {
+		return workQueue;
+	}
+
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
+
+	public Date getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Date endTime) {
+		this.endTime = endTime;
 	}
 
 }

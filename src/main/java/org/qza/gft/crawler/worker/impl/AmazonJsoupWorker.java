@@ -9,25 +9,25 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.qza.gft.crawler.CrawlerContext;
+import org.qza.gft.crawler.CrawlerWorkQueue;
 import org.qza.gft.crawler.worker.CrawlerWorkerBase;
 import org.qza.gft.crawler.worker.CrawlerWorkerException;
 
 /**
  * @author qza
- * 
+ *
  */
-public class JsoupWorker extends CrawlerWorkerBase {
-	private final String linkSelector;
+public class AmazonJsoupWorker extends CrawlerWorkerBase {
 
-	public JsoupWorker(String crawlerName, final CrawlerContext context) {
+	private final String linkSelector = "a.sim-img-title";
+
+	public AmazonJsoupWorker(String crawlerName, final CrawlerWorkQueue context) {
 		super(crawlerName, context);
-		linkSelector = context.getLinksCss();
 	}
 
 	public void execute() throws CrawlerWorkerException {
 		try {
-			final String pageUrl = getWorkQueue().take();
+			final String pageUrl = getCurrentLink();
 			final Collection<String> links = extractLinksFromPageUsingJsoup(pageUrl);
 			for (String link : links)
 				getWorkQueue().addAndVisitIfNotVisited(link);

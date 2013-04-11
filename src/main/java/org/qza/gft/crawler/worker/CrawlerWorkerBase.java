@@ -1,51 +1,48 @@
 package org.qza.gft.crawler.worker;
 
-import org.qza.gft.crawler.CrawlerContext;
-import org.qza.gft.crawler.CrawlerQueue;
+import org.qza.gft.crawler.CrawlerWorkQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author qza
- * 
+ *
  *         Base for all crawler workers.
- * 
+ *
  */
 public abstract class CrawlerWorkerBase implements CrawlerWorker {
 
-	final protected Logger log;
-	final protected CrawlerContext context;
+	protected final Logger log;
+	private final CrawlerWorkQueue workQueue;
+	private String currentLink;
 
-	public CrawlerWorkerBase(String crawlerName, final CrawlerContext context) {
+	public CrawlerWorkerBase(String crawlerName, final CrawlerWorkQueue workQueue) {
 		this.log = LoggerFactory.getLogger(crawlerName);
-		this.context = context;
+		this.workQueue = workQueue;
 	}
 
 	public void run() {
-		while (!Thread.currentThread().isInterrupted()) {
+		while (!Thread.currentThread().isInterrupted())
 			processSingleLink();
-		}
 
 		logSuccess();
 	}
 
 	private void processSingleLink() {
-		String link = getWorkQueue().peek();
-
 		try {
+			currentLink = getWorkQueue().take();
 			execute();
 		} catch (CrawlerWorkerException cwe) {
-			getWorkQueue().add(link);
-			logError(link, cwe);
+			getWorkQueue().add(currentLink);
+			logError(currentLink, cwe);
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
 		}
 	}
 
 	protected void logSuccess() {
-		final CrawlerQueue workQueue = context.getWorkQueue();
-
 		StringBuilder message = new StringBuilder();
-		message.append(String.format(" ~ completed ~ : ~ ( q : %d ) ( v : %d )", workQueue.getSize(),
-				workQueue.getVisitedSize()));
+		message.append(String.format("completed: (q : %d) (v : %d)", workQueue.getSize(), workQueue.getVisitedSize()));
 		log.info(message.toString());
 	}
 
@@ -55,8 +52,12 @@ public abstract class CrawlerWorkerBase implements CrawlerWorker {
 		log.error(message.toString(), ex);
 	}
 
-	protected CrawlerQueue getWorkQueue() {
-		return context.getWorkQueue();
+	protected CrawlerWorkQueue getWorkQueue() {
+		return workQueue;
+	}
+
+	protected String getCurrentLink() {
+		return currentLink;
 	}
 
 }

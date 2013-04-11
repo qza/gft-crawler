@@ -3,11 +3,14 @@ package org.qza.gft.crawler;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 /**
  * @author qza
- * 
+ *
  */
 public class CrawlerReporter {
 
@@ -27,20 +30,16 @@ public class CrawlerReporter {
 		try {
 			File file = new File(context.getReportsfile());
 			writer = new FileWriter(file);
-			Date startTime = context.getStartTime();
-			Date endTime = context.getEndTime();
-			Integer visitedSize = context.getWorkQueue().getVisitedSize();
-			String durationUnit = "Min.";
-			Integer duration = calculateDurationInMinutes(startTime, endTime);
-			if (duration == 0) {
-				durationUnit = "Sec.";
-				duration = calculateDurationInSeconds(startTime, endTime);
-			}
-			Integer visitedInMinute = calculateVisitedInMinute(visitedSize, duration);
-			String report = String.format(getTemplate(), spawner.getCorePoolSize(), spawner.getMaximumPoolSize(),
-					context.getReleaseTime(), duration, durationUnit, visitedSize, durationUnit, visitedInMinute,
-					context.getWorkQueue().getSize(), spawner.getTaskCount(), spawner.getCompletedTaskCount(),
-					spawner.getActiveCount());
+			Date startTime = spawner.getStartTime();
+			Date endTime = spawner.getEndTime();
+			Integer visitedSize = spawner.getWorkQueue().getVisitedSize();
+			String duration = calculateDuration(startTime, endTime);
+			BigDecimal visitedInSecond = calculateVisitedInSecond(visitedSize,
+					startTime, endTime);
+			String report = String.format(getTemplate(), spawner.getCorePoolSize(),
+					spawner.getMaximumPoolSize(), context.getReleaseTime(), duration, visitedSize, decimalFormat(visitedInSecond),
+					spawner.getWorkQueue().getSize(), spawner.getTaskCount(),
+					spawner.getCompletedTaskCount(), spawner.getActiveCount());
 			writer.write(report + "\r\n");
 			writer.close();
 		} catch (IOException e) {
@@ -51,8 +50,8 @@ public class CrawlerReporter {
 	public String getTemplate() {
 		StringBuilder template = new StringBuilder();
 		template.append("\r\n");
-		template.append(" \t\t Crawling report \t \r\n");
-		template.append(" ********************************** \r\n");
+		template.append(" Crawling report \t \r\n");
+		template.append(" ****************************************************** \r\n");
 		template.append("\r\n");
 		template.append(" Parameters: \t \r\n");
 		template.append(" \t Pool initialSize: \t\t\t %d \r\n");
@@ -60,30 +59,44 @@ public class CrawlerReporter {
 		template.append(" \t Release time: \t\t\t\t %d \r\n");
 		template.append("\r\n");
 		template.append(" Results: \t \r\n");
-		template.append(" \t Duration: \t\t\t\t\t %d %s \r\n");
+		template.append(" \t Duration: \t\t\t\t\t %s \r\n");
 		template.append(" \t Visited: \t\t\t\t\t %d \r\n");
-		template.append(" \t Visited / %s: \t\t\t %s \r\n");
+		template.append(" \t Visited / Second: \t\t\t %s \r\n");
 		template.append(" \t Remained in queue: \t\t %d \r\n");
 		template.append(" \t Executor task count: \t\t %d \r\n");
 		template.append(" \t Completed task count: \t\t %d \r\n");
 		template.append(" \t Remained task count: \t\t %d \r\n");
 		template.append("\r\n");
-		template.append(" ********************************** \r\n");
 		return template.toString();
 	}
 
-	private Integer calculateDurationInMinutes(Date start, Date end) {
-		int minutes = (int) ((end.getTime() - start.getTime()) / (1000 * 60));
-		return minutes;
+	private String calculateDuration(Date start, Date end) {
+		long duration = end.getTime() - start.getTime();
+		BigDecimal hours = roundNice(duration / (1000 * 60 * 60));
+		BigDecimal minutes = roundNice((duration - hours.intValue() * 1000 * 60 * 60)
+				/ (1000 * 60));
+		BigDecimal seconds = roundNice((duration - hours.intValue() * 1000 * 60
+				* 60 - minutes.intValue() * 1000 * 60) / 1000);
+		return String.format("%s hours %s minutes %s seconds",
+				decimalFormat(hours), decimalFormat(minutes),
+				decimalFormat(seconds));
 	}
 
-	private Integer calculateDurationInSeconds(Date start, Date end) {
-		int seconds = (int) ((end.getTime() - start.getTime()) / 1000);
-		return seconds;
+	private BigDecimal calculateVisitedInSecond(Integer visited, Date start,
+			Date end) {
+		BigDecimal seconds = roundNice((end.getTime() - start.getTime()) / (1000));
+		BigDecimal result = roundNice(visited).divide(seconds, 2,
+				RoundingMode.HALF_UP);
+		return result;
 	}
 
-	private Integer calculateVisitedInMinute(Integer visited, Integer duration) {
-		return visited / duration;
+	private BigDecimal roundNice(long value) {
+		return new BigDecimal(String.valueOf(value)).setScale(2,
+				BigDecimal.ROUND_HALF_UP);
+	}
+
+	private String decimalFormat(BigDecimal value) {
+		return new DecimalFormat("##.##").format(value);
 	}
 
 }

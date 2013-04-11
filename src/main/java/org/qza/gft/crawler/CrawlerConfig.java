@@ -32,11 +32,11 @@ public class CrawlerConfig {
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public CrawlerContext context() {
 		CrawlerContext context = new CrawlerContext();
-		context.setLinksCss(env.getProperty("crawler.links.css"));
 		context.setResultsfile(env.getProperty("crawler.resultsfile"));
 		context.setReportsfile(env.getProperty("crawler.reportsfile"));
 		context.setReleaseTime(getIntegerProperty("spawner.releasetime"));
-		context.getWorkQueue().add(env.getProperty("crawler.entry.url"));
+		context.setEntryUrl(env.getProperty("crawler.entry.url"));
+		context.setMaxResults(getIntegerProperty("crawler.maxresults"));
 		return context;
 	}
 
@@ -61,7 +61,7 @@ public class CrawlerConfig {
 	@Bean
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public CrawlerResulter resulter() {
-		CrawlerResulter resulter = new CrawlerResulter(context());
+		CrawlerResulter resulter = new CrawlerResulter(env.getProperty("crawler.resultsfile"), spawner().getWorkQueue());
 		return resulter;
 	}
 

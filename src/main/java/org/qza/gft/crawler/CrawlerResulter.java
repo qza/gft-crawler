@@ -7,15 +7,19 @@ import java.util.Iterator;
 
 /**
  * @author qza
- * 
+ *
  */
 public class CrawlerResulter {
 
-	private final CrawlerContext context;
+	private final String resultsFilePath;
 
-	public CrawlerResulter(final CrawlerContext context) {
-		this.context = context;
+	private final CrawlerWorkQueue workQueue;
+
+	public CrawlerResulter(String resultsFilePath, CrawlerWorkQueue workQueue) {
+		this.resultsFilePath = resultsFilePath;
+		this.workQueue = workQueue;
 	}
+
 
 	/**
 	 * Writes visited link from context to file
@@ -23,9 +27,9 @@ public class CrawlerResulter {
 	public void writeLinksToFile() {
 		FileWriter writer;
 		try {
-			File file = new File(context.getResultsfile());
+			File file = new File(resultsFilePath);
 			writer = new FileWriter(file);
-			Iterator<String> it = context.getWorkQueue().getVisitedLinks().iterator();
+			Iterator<String> it = workQueue.getVisitedLinks().iterator();
 			while (it.hasNext()) {
 				String lnk = it.next();
 				writer.write(lnk + "\r\n");
