@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author qza
- *
+ * 
  *         Spawns multiple crawler workers with pool executor
- *
+ * 
  */
 public class CrawlerSpawner {
 
@@ -53,7 +53,7 @@ public class CrawlerSpawner {
 	}
 
 	private void waitToFinish() {
-		while (isNotResultMax()) {
+		while (!context.getWorkQueue().isEmpty()) {
 			zzz(1000);
 		}
 
@@ -69,11 +69,6 @@ public class CrawlerSpawner {
 			// ignore
 		}
 
-	}
-
-	protected boolean isNotResultMax() {
-		final CrawlerQueue workQueue = context.getWorkQueue();
-		return context.getMaxResults() >= workQueue.getVisitedSize();
 	}
 
 	protected void zzz(long time) {

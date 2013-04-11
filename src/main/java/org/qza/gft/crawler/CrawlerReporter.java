@@ -14,8 +14,7 @@ public class CrawlerReporter {
 	final CrawlerContext context;
 	final CrawlerSpawner spawner;
 
-	public CrawlerReporter(final CrawlerContext context,
-			final CrawlerSpawner spawner) {
+	public CrawlerReporter(final CrawlerContext context, final CrawlerSpawner spawner) {
 		this.context = context;
 		this.spawner = spawner;
 	}
@@ -37,15 +36,11 @@ public class CrawlerReporter {
 				durationUnit = "Sec.";
 				duration = calculateDurationInSeconds(startTime, endTime);
 			}
-			Integer visitedInMinute = calculateVisitedInMinute(visitedSize,
-					duration);
-			String report = String.format(getTemplate(),
-					context.getCrawlerCount(), context.getInitPause(),
-					context.getWait4queue(), spawner.getCorePoolSize(),
-					spawner.getMaximumPoolSize(), context.getReleaseTime(),
-					duration, durationUnit, visitedSize, durationUnit, visitedInMinute,
-					context.getWorkQueue().getSize(), spawner.getTaskCount(),
-					spawner.getCompletedTaskCount(), spawner.getActiveCount());
+			Integer visitedInMinute = calculateVisitedInMinute(visitedSize, duration);
+			String report = String.format(getTemplate(), spawner.getCorePoolSize(), spawner.getMaximumPoolSize(),
+					context.getReleaseTime(), duration, durationUnit, visitedSize, durationUnit, visitedInMinute,
+					context.getWorkQueue().getSize(), spawner.getTaskCount(), spawner.getCompletedTaskCount(),
+					spawner.getActiveCount());
 			writer.write(report + "\r\n");
 			writer.close();
 		} catch (IOException e) {
@@ -60,9 +55,6 @@ public class CrawlerReporter {
 		template.append(" ********************************** \r\n");
 		template.append("\r\n");
 		template.append(" Parameters: \t \r\n");
-		template.append(" \t Runner count: \t\t\t\t %d \r\n");
-		template.append(" \t Runner init pause: \t\t %d \r\n");
-		template.append(" \t Wait 4 queue: \t\t\t\t %b \r\n");
 		template.append(" \t Pool initialSize: \t\t\t %d \r\n");
 		template.append(" \t Pool maxSize: \t\t\t\t %d \r\n");
 		template.append(" \t Release time: \t\t\t\t %d \r\n");

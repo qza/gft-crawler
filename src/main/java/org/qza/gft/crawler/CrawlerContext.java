@@ -17,15 +17,9 @@ public class CrawlerContext {
 
 	private String linksCss;
 
-	private Boolean wait4queue;
-
-	private Integer maxResults;
-
 	private String resultsfile;
 	private String reportsfile;
 
-	private Integer crawlerCount;
-	private Integer initPause;
 	private Integer releaseTime;
 
 	public CrawlerQueue getWorkQueue() {
@@ -60,22 +54,6 @@ public class CrawlerContext {
 		this.linksCss = linksCss;
 	}
 
-	public Boolean getWait4queue() {
-		return wait4queue;
-	}
-
-	public void setWait4queue(Boolean wait4queue) {
-		this.wait4queue = wait4queue;
-	}
-
-	public Integer getMaxResults() {
-		return maxResults;
-	}
-
-	public void setMaxResults(Integer maxResults) {
-		this.maxResults = maxResults;
-	}
-
 	public String getResultsfile() {
 		return resultsfile;
 	}
@@ -84,28 +62,12 @@ public class CrawlerContext {
 		this.resultsfile = resultsfile;
 	}
 
-	public Integer getCrawlerCount() {
-		return crawlerCount;
-	}
-
-	public void setCrawlerCount(Integer crawlerCount) {
-		this.crawlerCount = crawlerCount;
-	}
-
 	public Integer getReleaseTime() {
 		return releaseTime;
 	}
 
 	public void setReleaseTime(Integer releaseTime) {
 		this.releaseTime = releaseTime;
-	}
-
-	public Integer getInitPause() {
-		return initPause;
-	}
-
-	public void setInitPause(Integer initPause) {
-		this.initPause = initPause;
 	}
 
 	public String getReportsfile() {

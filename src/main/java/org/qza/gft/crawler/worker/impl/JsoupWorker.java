@@ -15,7 +15,7 @@ import org.qza.gft.crawler.worker.CrawlerWorkerException;
 
 /**
  * @author qza
- *
+ * 
  */
 public class JsoupWorker extends CrawlerWorkerBase {
 	private final String linkSelector;
@@ -29,14 +29,15 @@ public class JsoupWorker extends CrawlerWorkerBase {
 		try {
 			final String pageUrl = getWorkQueue().take();
 			final Collection<String> links = extractLinksFromPageUsingJsoup(pageUrl);
-			for(String link: links)
+			for (String link : links)
 				getWorkQueue().addAndVisitIfNotVisited(link);
 		} catch (Throwable ex) {
 			throw new CrawlerWorkerException(ex.getMessage(), ex);
 		}
 	}
 
-	private Collection<String> extractLinksFromPageUsingJsoup(String pageUrl) throws ClientProtocolException, IOException {
+	private Collection<String> extractLinksFromPageUsingJsoup(String pageUrl) throws ClientProtocolException,
+			IOException {
 		final Document document = Jsoup.connect(pageUrl).timeout(0).get();
 		return extractLinksFromDocument(document);
 	}

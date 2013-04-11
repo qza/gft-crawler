@@ -45,7 +45,7 @@ public class CrawlerQueue {
 	public synchronized String take() throws InterruptedException {
 		while (queuedLinks.isEmpty())
 			wait();
-		
+
 		return queuedLinks.poll();
 	}
 

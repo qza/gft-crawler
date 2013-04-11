@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author qza
- *
+ * 
  *         Base for all crawler workers.
- *
+ * 
  */
 public abstract class CrawlerWorkerBase implements CrawlerWorker {
 

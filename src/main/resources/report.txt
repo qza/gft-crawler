@@ -11,13 +11,13 @@
  	 Release time: 				 10 
 
  Results: 	 
- 	 Duration: 					 13 Min. 
- 	 Visited: 					 10234 
- 	 Visited / Min.: 			 787 
- 	 Remained in queue: 		 6585 
- 	 Executor task count: 		 25 
- 	 Completed task count: 		 0 
- 	 Remained task count: 		 25 
+ 	 Duration: 					 2 Min. 
+ 	 Visited: 					 10125 
+ 	 Visited / Min.: 			 5062 
+ 	 Remained in queue: 		 6208 
+ 	 Executor task count: 		 50 
+ 	 Completed task count: 		 33 
+ 	 Remained task count: 		 17 
 
  ********************************** 
 
